@@ -47,11 +47,15 @@ def load_movies():
     # Read u.user file and insert data
     for row in open("seed_data/u.item"):
         row = row.rstrip().split("|")
+
         movie_id = row[0]
-        title = row[1].split("(")
+        title = row[1]
+        title = title[:-7]
+        title = title.rstrip()
         
         if title != 'unknown':
-            title = title[0]
+            title = title
+
             released_at = row[2]
             
             if released_at != "":
@@ -85,12 +89,11 @@ def load_ratings():
     # Read u.user file and insert data
     for row in open("seed_data/u.data"):
         row = row.rstrip()
-        rating_id, movie_id, user_id, score = row.split()
+        user_id, movie_id, score, timestamp = row.split()
 
-        rating = Rating(rating_id=rating_id,
-                    movie_id=movie_id,
-                    user_id=user_id,
-                    score=score)
+        rating = Rating(user_id=user_id, 
+                        movie_id=movie_id,
+                        score=score)
 
         # We need to add to the session or it won't ever be stored
         db.session.add(rating)

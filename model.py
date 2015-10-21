@@ -42,17 +42,26 @@ class Movie(db.Model):
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return ("<Movie movie_id=%s title=%s released_at=" % (self.movie_id, self.title) 
-            + self.released_at.strptime("%d-%b-%Y") + " imdb_url=%s>" % (self.imdb_url))
+        return ("<Movie movie_id=%s title=%s" % (self.movie_id, self.title) 
+             + " imdb_url=%s>" % (self.imdb_url))
 
 class Rating(db.Model):
-    """Rating of ratins website."""
+    """Rating of ratings website."""
+
+    __tablename__ = "ratings"
 
     rating_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    movie_id = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, nullable=False)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movies.movie_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     score = db.Column(db.Integer, nullable=False)
 
+    #Define relationship to user
+    user = db.relationship("User",
+                            backref=db.backref("ratings", order_by=rating_id))
+
+    # Define relationship to movie
+    movie = db.relationship("Movie",
+                            backref=db.backref("ratings", order_by=rating_id))
 
     def __repr__(self):
         """Provide helpful representation when printed."""
