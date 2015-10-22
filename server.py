@@ -48,15 +48,34 @@ def submit():
 
     # We need to check db to see if email and password exist, otherwise add it to db
 
-    user = User.query.filter((User.email==email) & (User.password == password).first()
+    user = User.query.filter(User.email==email).first()
+    #if the email is in the db
+    if user.email == email:
+        #if the password is correct
+        if user.password == password:
+            flash('You were successfully logged in')
+            # XXX PUT USEER ID IN SESSION    session["userid"]
+            return redirect("/")
+        else:
+            flash('Your password is incorrect')
+            return redirect("/login")
+            #show user a message that their password is incorrect
+    # email not in db, add email and password to db
+    else:
+        user = User(email=email, password=password)
+        flash('Your account was created!')
+        db.session.add(user)
+        db.session.commit()
+        return redirect("/")
 
-    db.session.add(user, password)
-    db.session.commit()
+@app.route("/logout")
+def log_out():
+    """Show user logout."""
 
-    print user
-
+    # user = User.query(User.email==email).first()
+    # db.session.delete(user)
+    flash('You were successfully logged out!')
     return redirect("/")
-
 
 
 if __name__ == "__main__":
