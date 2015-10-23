@@ -30,7 +30,40 @@ def user_list():
     """Show list of users."""
 
     users = User.query.all()
+
     return render_template("user_list.html", users=users)
+
+
+@app.route("/movies")
+def movie_list():
+    """Show list of movies."""
+
+    movies = Movie.query.order_by("title").all()
+
+    return render_template("movie_list.html", movies=movies)
+
+
+@app.route("/movies/<int:movie_id>", methods=['GET'])
+def movie_rating(movie_id):
+    """Show list of ratings by movie."""
+    movie = Movie.query.get(movie_id)
+
+
+    #####TODO need a page that shows movie info and ratings. 
+    #####Route is not taking us to template
+    ratings = Rating.query.get(movie_id)
+
+    return render_template("ratings_list.html", movie=movie)
+
+
+@app.route("/users/<int:user_id>")
+def user_ratings(user_id):
+    """Show list of movies a user has rated."""
+
+    user = User.query.get(user_id)
+
+    return render_template("user_page.html", user=user,)
+
 
 @app.route("/login")
 def log_in():
@@ -46,16 +79,15 @@ def submit():
     email = request.form["email"]
     password = request.form["password"]
 
-    # We need to check db to see if email and password exist, otherwise add it to db
-
     user = User.query.filter(User.email==email).first()
-    #if the email is in the db
-    if user.email == email:
+
+    if user:
         #if the password is correct
         if user.password == password:
             flash('You were successfully logged in')
-            # XXX PUT USEER ID IN SESSION    session["userid"]
-            return redirect("/")
+
+            session["userid"] = user.user_id
+            return redirect("/users/%s" % user.user_id)
         else:
             flash('Your password is incorrect')
             return redirect("/login")
@@ -68,14 +100,13 @@ def submit():
         db.session.commit()
         return redirect("/")
 
-@app.route("/logout")
-def log_out():
-    """Show user logout."""
 
-    # user = User.query(User.email==email).first()
-    # db.session.delete(user)
+@app.route('/logout')
+def logout():
+    # remove the username from the session if it's there
+    session.pop('userid', None)
     flash('You were successfully logged out!')
-    return redirect("/")
+    return redirect('/')
 
 
 if __name__ == "__main__":
@@ -89,3 +120,4 @@ if __name__ == "__main__":
     DebugToolbarExtension(app)
 
     app.run()
+
